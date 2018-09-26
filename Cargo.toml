@@ -1,0 +1,7 @@
+[package]
+name = "fill-a-pix-rust"
+version = "0.1.0"
+authors = ["Greg Lara <rglara@sep.com>"]
+
+[dependencies]
+piston_window = "*" # 0.80.0 at time of writing
