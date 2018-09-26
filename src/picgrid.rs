@@ -1,15 +1,13 @@
 //! Grid for picture.
 
-/// Width of grid.
-const WIDTH: usize = 5;
-
-/// Height of grid.
-const HEIGHT: usize = 5;
-
 /// Stores picture grid data.
 pub struct PictureGrid {
+    /// Width of grid.
+    pub width: u16,
+    /// Height of grid.
+    pub height: u16,
     /// Stores the content of the grid cells.
-    pub cells: [[u8; WIDTH]; HEIGHT],
+    pub cells: Vec<u8>,
 }
 
 impl PictureGrid {
@@ -17,9 +15,11 @@ impl PictureGrid {
     pub const EMPTY: u8 = 10;
 
     /// Creates new picture grid.
-    pub fn new() -> PictureGrid {
+    pub fn new(width: u16, height: u16) -> PictureGrid {
         PictureGrid {
-            cells: [[PictureGrid::EMPTY; WIDTH]; HEIGHT],
+            width: width,
+            height: height,
+            cells: vec![PictureGrid::EMPTY; usize::from(width * height)],
         }
     }
 }

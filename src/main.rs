@@ -15,12 +15,12 @@ mod picgrid_controller;
 mod picgrid_view;
 
 fn main() {
-    let picgrid = PictureGrid::new();
+    let picgrid = PictureGrid::new(5, 5);
     let mut picgrid_controller = PictureGridController::new(picgrid);
     let picgrid_view_settings = PictureGridViewSettings::new();
     let picgrid_view = PictureGridView::new(picgrid_view_settings);
 
-    let mut window: PistonWindow = WindowSettings::new("Fill-a-Pix", [640, 40])
+    let mut window: PistonWindow = WindowSettings::new("Fill-a-Pix", [800, 600])
         .exit_on_esc(true)
         .build()
         .unwrap();
