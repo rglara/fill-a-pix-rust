@@ -2,10 +2,11 @@
 
 //! A Fill-a-pix viewer
 
+extern crate find_folder;
 extern crate piston_window;
 
 use piston_window::types::Color;
-use piston_window::{clear, PistonWindow, WindowSettings};
+use piston_window::{clear, Filter, Glyphs, PistonWindow, TextureSettings, WindowSettings};
 
 pub use picgrid::{CellState, PictureGrid};
 pub use picgrid_controller::PictureGridController;
@@ -53,12 +54,21 @@ fn main() {
         .exit_on_esc(true)
         .build()
         .unwrap();
+
+    let assets = find_folder::Search::ParentsThenKids(3, 3)
+        .for_folder("assets")
+        .unwrap();
+    let ref font = assets.join("FiraSans-Regular.ttf");
+    let factory = window.factory.clone();
+    let texture_settings = TextureSettings::new().filter(Filter::Nearest);
+    let mut glyphs = Glyphs::new(font, factory, texture_settings).unwrap();
+
     while let Some(event) = window.next() {
         picgrid_controller.event(&event);
 
         window.draw_2d(&event, |context, graphics| {
             clear(BGCOLOR, graphics);
-            picgrid_view.draw(&picgrid_controller, &context, graphics);
+            picgrid_view.draw(&picgrid_controller, &mut glyphs, &context, graphics);
         });
     }
 }

@@ -5,3 +5,4 @@ authors = ["Greg Lara <rglara@sep.com>"]
 
 [dependencies]
 piston_window = "*" # 0.80.0 at time of writing
+find_folder = "*"   # 0.3.0 at time of writing

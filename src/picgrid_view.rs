@@ -1,9 +1,14 @@
 //! PictureGrid view.
 
+use piston_window::character::CharacterCache;
 use piston_window::context::Context;
+use piston_window::line::Line;
+use piston_window::rectangle::{Border, Rectangle};
+use piston_window::text::Text;
 use piston_window::types::Color;
-use piston_window::Graphics;
+use piston_window::{Graphics, Transformed};
 
+use picgrid::{CellState, PictureGrid};
 use PictureGridController;
 
 /// Stores picgrid view settings.
@@ -18,8 +23,6 @@ pub struct PictureGridViewSettings {
     pub grid_border_width: f64,
     /// width of cell grid border
     pub cell_border_width: f64,
-    /// size of hint text
-    pub cell_hint_text_size: u8,
     /// color of hint text (when cell is unsolved)
     pub cell_unsolved_hint_text_color: Color,
     /// background color of cell (when cell is unsolved)
@@ -43,13 +46,12 @@ impl PictureGridViewSettings {
             grid_border_color: [0.4, 0.4, 0.4, 1.0],
             grid_border_width: 3.0,
             cell_border_width: 1.0,
-            cell_hint_text_size: 12,
             cell_unsolved_hint_text_color: [0.0, 0.0, 0.0, 1.0],
             cell_unsolved_background_color: [1.0; 4],
             cell_solved_shaded_hint_text_color: [1.0; 4],
             cell_solved_shaded_background_color: [0.0, 0.0, 0.0, 1.0],
-            cell_solved_unshaded_hint_text_color: [0.8, 0.8, 0.8, 1.0],
-            cell_solved_unshaded_background_color: [0.7, 0.7, 0.7, 1.0],
+            cell_solved_unshaded_hint_text_color: [0.5, 0.5, 0.5, 1.0],
+            cell_solved_unshaded_background_color: [0.9, 0.9, 0.9, 1.0],
         }
     }
 }
@@ -67,9 +69,16 @@ impl PictureGridView {
     }
 
     /// Draw picture grid.
-    pub fn draw<G: Graphics>(&self, controller: &PictureGridController, c: &Context, g: &mut G) {
-        use piston_window::rectangle::{Border, Rectangle};
-
+    pub fn draw<C, G>(
+        &self,
+        controller: &PictureGridController,
+        glyphs: &mut C,
+        c: &Context,
+        g: &mut G,
+    ) where
+        C: CharacterCache,
+        G: Graphics<Texture = <C as CharacterCache>::Texture>,
+    {
         let ref settings = self.settings;
         let grid_rect = [
             settings.position[0],
@@ -96,6 +105,10 @@ impl PictureGridView {
             Rectangle::new(settings.cell_solved_shaded_background_color).border(cell_border);
         let cell_solved_unshaded =
             Rectangle::new(settings.cell_solved_unshaded_background_color).border(cell_border);
+        let cell_solved_unshaded_x = Line::new(
+            settings.cell_solved_unshaded_hint_text_color,
+            settings.cell_border_width,
+        );
         let mut column_ptr: u16 = 0;
         let mut row_ptr: u16 = 0;
         let mut cell_rect = [0.0, 0.0, settings.cell_size, settings.cell_size];
@@ -103,32 +116,66 @@ impl PictureGridView {
             grid_rect[0] + f64::from(settings.grid_border_width / 2.0),
             grid_rect[1] + f64::from(settings.grid_border_width / 2.0),
         ];
-        for state in &controller.picgrid.cells {
-            use picgrid::CellState;
+        let cell_hint_text_size = (settings.cell_size * 0.75) as u32;
 
+        for state in &controller.picgrid.cells {
             cell_rect[0] = grid_origin[0] + (f64::from(column_ptr) * settings.cell_size);
             cell_rect[1] = grid_origin[1] + (f64::from(row_ptr) * settings.cell_size);
 
-            let draw_hint = |val: &u8| {
-                use picgrid::PictureGrid;
-                if val < &PictureGrid::EMPTY {}
-            };
+            let text_transform = c.transform.trans(
+                cell_rect[0] + (settings.cell_size * 0.30),
+                cell_rect[1] + (settings.cell_size * 0.75),
+            );
 
-            // draw background color
             match state {
                 CellState::Unsolved(value) => {
                     cell_unsolved.draw(cell_rect, &c.draw_state, c.transform, g);
-                    draw_hint(value);
+                    if *value < PictureGrid::EMPTY {
+                        Text::new_color(
+                            settings.cell_unsolved_hint_text_color,
+                            cell_hint_text_size,
+                        ).draw(&value.to_string(), glyphs, &c.draw_state, text_transform, g)
+                        .ok();
+                    }
                 }
                 CellState::Shaded(value) => {
                     cell_solved_shaded.draw(cell_rect, &c.draw_state, c.transform, g);
-                    draw_hint(value);
+                    if *value < PictureGrid::EMPTY {
+                        Text::new_color(
+                            settings.cell_solved_shaded_hint_text_color,
+                            cell_hint_text_size,
+                        ).draw(&value.to_string(), glyphs, &c.draw_state, text_transform, g)
+                        .ok();
+                    }
                 }
                 CellState::Unshaded(value) => {
                     cell_solved_unshaded.draw(cell_rect, &c.draw_state, c.transform, g);
-                    draw_hint(value);
+                    if *value < PictureGrid::EMPTY {
+                        Text::new_color(
+                            settings.cell_solved_unshaded_hint_text_color,
+                            cell_hint_text_size,
+                        ).draw(&value.to_string(), glyphs, &c.draw_state, text_transform, g)
+                        .ok();
+                    }
 
                     // draw "X"
+                    let padding_percent = 0.2;
+                    let left = cell_rect[0] + (cell_rect[2] * padding_percent);
+                    let right = cell_rect[0] + cell_rect[2] - (cell_rect[2] * padding_percent);
+                    let top = cell_rect[1] + (cell_rect[3] * padding_percent);
+                    let bottom = cell_rect[1] + cell_rect[3] - (cell_rect[3] * padding_percent);
+                    cell_solved_unshaded_x.draw(
+                        [left, top, right, bottom],
+                        &c.draw_state,
+                        c.transform,
+                        g,
+                    );
+                    cell_solved_unshaded_x.draw(
+                        [left, bottom, right, top],
+                        &c.draw_state,
+                        c.transform,
+                        g,
+                    );
                 }
             }
 
