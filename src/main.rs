@@ -49,7 +49,7 @@ fn main() {
     let picgrid_view_settings = PictureGridViewSettings::new();
     let picgrid_view = PictureGridView::new(picgrid_view_settings);
 
-    let mut window: PistonWindow = WindowSettings::new("Fill-a-Pix", [800, 600])
+    let mut window: PistonWindow = WindowSettings::new("Fill-a-Pix", [400, 400])
         .exit_on_esc(true)
         .build()
         .unwrap();

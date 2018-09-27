@@ -40,7 +40,7 @@ impl PictureGridViewSettings {
         PictureGridViewSettings {
             position: [30.0; 2],
             cell_size: 50.0,
-            grid_border_color: [0.7, 0.7, 0.7, 1.0],
+            grid_border_color: [0.4, 0.4, 0.4, 1.0],
             grid_border_width: 3.0,
             cell_border_width: 1.0,
             cell_hint_text_size: 12,
@@ -48,8 +48,8 @@ impl PictureGridViewSettings {
             cell_unsolved_background_color: [1.0; 4],
             cell_solved_shaded_hint_text_color: [1.0; 4],
             cell_solved_shaded_background_color: [0.0, 0.0, 0.0, 1.0],
-            cell_solved_unshaded_hint_text_color: [0.7, 0.7, 0.7, 1.0],
-            cell_solved_unshaded_background_color: [0.1, 0.1, 0.1, 1.0],
+            cell_solved_unshaded_hint_text_color: [0.8, 0.8, 0.8, 1.0],
+            cell_solved_unshaded_background_color: [0.7, 0.7, 0.7, 1.0],
         }
     }
 }
@@ -86,11 +86,16 @@ impl PictureGridView {
         ).draw(grid_rect, &c.draw_state, c.transform, g);
 
         // grid cells
+        let cell_border = Border {
+            color: settings.grid_border_color,
+            radius: (settings.cell_border_width / 2.0).into(),
+        };
         let cell_unsolved =
-            Rectangle::new(settings.cell_unsolved_background_color).border(Border {
-                color: settings.grid_border_color,
-                radius: (settings.cell_border_width / 2.0).into(),
-            });
+            Rectangle::new(settings.cell_unsolved_background_color).border(cell_border);
+        let cell_solved_shaded =
+            Rectangle::new(settings.cell_solved_shaded_background_color).border(cell_border);
+        let cell_solved_unshaded =
+            Rectangle::new(settings.cell_solved_unshaded_background_color).border(cell_border);
         let mut column_ptr: u16 = 0;
         let mut row_ptr: u16 = 0;
         let mut cell_rect = [0.0, 0.0, settings.cell_size, settings.cell_size];
@@ -98,10 +103,34 @@ impl PictureGridView {
             grid_rect[0] + f64::from(settings.grid_border_width / 2.0),
             grid_rect[1] + f64::from(settings.grid_border_width / 2.0),
         ];
-        for _val in &controller.picgrid.cells {
+        for state in &controller.picgrid.cells {
+            use picgrid::CellState;
+
             cell_rect[0] = grid_origin[0] + (f64::from(column_ptr) * settings.cell_size);
             cell_rect[1] = grid_origin[1] + (f64::from(row_ptr) * settings.cell_size);
-            cell_unsolved.draw(cell_rect, &c.draw_state, c.transform, g);
+
+            let draw_hint = |val: &u8| {
+                use picgrid::PictureGrid;
+                if val < &PictureGrid::EMPTY {}
+            };
+
+            // draw background color
+            match state {
+                CellState::Unsolved(value) => {
+                    cell_unsolved.draw(cell_rect, &c.draw_state, c.transform, g);
+                    draw_hint(value);
+                }
+                CellState::Shaded(value) => {
+                    cell_solved_shaded.draw(cell_rect, &c.draw_state, c.transform, g);
+                    draw_hint(value);
+                }
+                CellState::Unshaded(value) => {
+                    cell_solved_unshaded.draw(cell_rect, &c.draw_state, c.transform, g);
+                    draw_hint(value);
+
+                    // draw "X"
+                }
+            }
 
             column_ptr += 1;
             if column_ptr == controller.picgrid.width {
