@@ -4,6 +4,7 @@
 
 extern crate piston_window;
 
+use piston_window::types::Color;
 use piston_window::{clear, PistonWindow, WindowSettings};
 
 pub use picgrid::PictureGrid;
@@ -13,6 +14,8 @@ pub use picgrid_view::{PictureGridView, PictureGridViewSettings};
 mod picgrid;
 mod picgrid_controller;
 mod picgrid_view;
+
+const BGCOLOR: Color = [0.89, 0.87, 0.73, 1.0];
 
 fn main() {
     let picgrid = PictureGrid::new(5, 5);
@@ -28,7 +31,7 @@ fn main() {
         picgrid_controller.event(&event);
 
         window.draw_2d(&event, |context, graphics| {
-            clear([1.0; 4], graphics);
+            clear(BGCOLOR, graphics);
             picgrid_view.draw(&picgrid_controller, &context, graphics);
         });
     }
