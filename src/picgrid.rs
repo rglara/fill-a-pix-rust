@@ -1,5 +1,16 @@
 //! Grid for picture.
 
+/// Enumeration of cell states
+#[derive(Clone)]
+pub enum CellState {
+    /// Cell is not solved yet
+    Unsolved(u8),
+    /// Cell is solved and should be shaded
+    Shaded(u8),
+    /// Cell is solved and should be unshaded
+    Unshaded(u8),
+}
+
 /// Stores picture grid data.
 pub struct PictureGrid {
     /// Width of grid.
@@ -7,7 +18,7 @@ pub struct PictureGrid {
     /// Height of grid.
     pub height: u16,
     /// Stores the content of the grid cells.
-    pub cells: Vec<u8>,
+    pub cells: Vec<CellState>,
 }
 
 impl PictureGrid {
@@ -19,7 +30,13 @@ impl PictureGrid {
         PictureGrid {
             width: width,
             height: height,
-            cells: vec![PictureGrid::EMPTY; usize::from(width * height)],
+            cells: vec![CellState::Unsolved(PictureGrid::EMPTY); usize::from(width * height)],
         }
+    }
+
+    /// Sets cell values
+    pub fn with_values(mut self, values: Vec<CellState>) -> Self {
+        self.cells = values;
+        self
     }
 }
