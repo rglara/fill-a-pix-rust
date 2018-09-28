@@ -15,7 +15,7 @@ use PictureGridController;
 pub struct PictureGridViewSettings {
     /// (x,y) position of upper left corner of grid
     pub position: [f64; 2],
-    /// width/height of grid cells
+    /// width/height of grid cells (only if viewport cannot be determined)
     pub cell_size: f64,
     /// color of grid borders
     pub grid_border_color: Color,
@@ -80,12 +80,21 @@ impl PictureGridView {
         G: Graphics<Texture = <C as CharacterCache>::Texture>,
     {
         let ref settings = self.settings;
+        let mut cell_size = settings.cell_size;
+        if let Some(vp) = c.viewport {
+            let hcell = ((vp.rect[2] as f64) - (settings.position[0] * 2.0))
+                / (controller.picgrid.width as f64);
+            let vcell = ((vp.rect[3] as f64) - (settings.position[1] * 2.0))
+                / (controller.picgrid.height as f64);
+
+            cell_size = f64::min(hcell, vcell);
+        }
+
         let grid_rect = [
             settings.position[0],
             settings.position[1],
-            (settings.cell_size * f64::from(controller.picgrid.width)) + settings.grid_border_width,
-            (settings.cell_size * f64::from(controller.picgrid.height))
-                + settings.grid_border_width,
+            (cell_size * f64::from(controller.picgrid.width)) + settings.grid_border_width,
+            (cell_size * f64::from(controller.picgrid.height)) + settings.grid_border_width,
         ];
 
         // outer grid border
@@ -111,20 +120,20 @@ impl PictureGridView {
         );
         let mut column_ptr: u16 = 0;
         let mut row_ptr: u16 = 0;
-        let mut cell_rect = [0.0, 0.0, settings.cell_size, settings.cell_size];
+        let mut cell_rect = [0.0, 0.0, cell_size, cell_size];
         let grid_origin = [
             grid_rect[0] + f64::from(settings.grid_border_width / 2.0),
             grid_rect[1] + f64::from(settings.grid_border_width / 2.0),
         ];
-        let cell_hint_text_size = (settings.cell_size * 0.75) as u32;
+        let cell_hint_text_size = (cell_size * 0.75) as u32;
 
         for state in &controller.picgrid.cells {
-            cell_rect[0] = grid_origin[0] + (f64::from(column_ptr) * settings.cell_size);
-            cell_rect[1] = grid_origin[1] + (f64::from(row_ptr) * settings.cell_size);
+            cell_rect[0] = grid_origin[0] + (f64::from(column_ptr) * cell_size);
+            cell_rect[1] = grid_origin[1] + (f64::from(row_ptr) * cell_size);
 
             let text_transform = c.transform.trans(
-                cell_rect[0] + (settings.cell_size * 0.30),
-                cell_rect[1] + (settings.cell_size * 0.75),
+                cell_rect[0] + (cell_size * 0.30),
+                cell_rect[1] + (cell_size * 0.75),
             );
 
             match state {
