@@ -3,5 +3,6 @@
         "**/.git/objects/**": true,
         "**/.git/subtree-cache/**": true,
         "**/target/**": true
-    }
+    },
+    "json.format.enable": false
 }

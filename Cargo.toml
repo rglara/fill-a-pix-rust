@@ -4,5 +4,8 @@ version = "0.1.0"
 authors = ["Greg Lara <rglara@sep.com>"]
 
 [dependencies]
-piston_window = "*" # 0.80.0 at time of writing
-find_folder = "*"   # 0.3.0 at time of writing
+piston_window = "0.80.0"
+find_folder = "0.3.0"
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"

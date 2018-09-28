@@ -2,6 +2,11 @@
 
 //! A Fill-a-pix viewer
 
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
+extern crate serde_json;
+
 extern crate find_folder;
 extern crate piston_window;
 
@@ -19,33 +24,26 @@ mod picgrid_view;
 const BGCOLOR: Color = [0.89, 0.87, 0.73, 1.0];
 
 fn main() {
-    let picgrid = PictureGrid::new(5, 5).with_values(vec![
-        CellState::Unshaded(0),
-        CellState::Unshaded(PictureGrid::EMPTY),
-        CellState::Shaded(4),
-        CellState::Shaded(4),
-        CellState::Unshaded(PictureGrid::EMPTY),
-        CellState::Unshaded(PictureGrid::EMPTY),
-        CellState::Unshaded(4),
-        CellState::Shaded(PictureGrid::EMPTY),
-        CellState::Shaded(6),
-        CellState::Unshaded(PictureGrid::EMPTY),
-        CellState::Unsolved(3),
-        CellState::Unsolved(PictureGrid::EMPTY),
-        CellState::Unsolved(7),
-        CellState::Shaded(6),
-        CellState::Shaded(PictureGrid::EMPTY),
-        CellState::Unsolved(PictureGrid::EMPTY),
-        CellState::Unsolved(6),
-        CellState::Unsolved(PictureGrid::EMPTY),
-        CellState::Unsolved(6),
-        CellState::Unsolved(5),
-        CellState::Unsolved(PictureGrid::EMPTY),
-        CellState::Unsolved(PictureGrid::EMPTY),
-        CellState::Unsolved(PictureGrid::EMPTY),
-        CellState::Unsolved(PictureGrid::EMPTY),
-        CellState::Unsolved(3),
-    ]);
+    let picgrid: PictureGrid;
+    if let Some(filename) = std::env::args().nth(1) {
+        println!("Loading {}...", filename);
+
+        // TODO: load the real file
+        let loaded_file = "{\"width\":5,\"height\":5,\"cells\":[{\"Unsolved\":0},{\"Unsolved\":10},{\"Unsolved\":4},{\"Unsolved\":4},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":4},{\"Unsolved\":10},{\"Unsolved\":6},{\"Unsolved\":10},{\"Unsolved\":3},{\"Unsolved\":10},{\"Unsolved\":7},{\"Unsolved\":6},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":6},{\"Unsolved\":10},{\"Unsolved\":6},{\"Unsolved\":5},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":3}]}";
+
+        let deserialized_try = serde_json::from_str(&loaded_file);
+        if deserialized_try.is_ok() {
+            picgrid = deserialized_try.unwrap();
+            println!("{} loaded!", filename)
+        } else {
+            println!("Unable to load {}", filename);
+            std::process::exit(2);
+        }
+    } else {
+        println!("No filename provided");
+        std::process::exit(1);
+    }
+
     let mut picgrid_controller = PictureGridController::new(picgrid);
     let picgrid_view_settings = PictureGridViewSettings::new();
     let picgrid_view = PictureGridView::new(picgrid_view_settings);

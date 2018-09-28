@@ -1,0 +1,11 @@
+{
+    "width": 5,
+    "height": 5,
+    "cells": [
+        {"Unsolved": 0}, {"Unsolved":10}, {"Unsolved": 4}, {"Unsolved": 4}, {"Unsolved":10},
+        {"Unsolved":10}, {"Unsolved": 4}, {"Unsolved":10}, {"Unsolved": 6}, {"Unsolved":10},
+        {"Unsolved": 3}, {"Unsolved":10}, {"Unsolved": 7}, {"Unsolved": 6}, {"Unsolved":10},
+        {"Unsolved":10}, {"Unsolved": 6}, {"Unsolved":10}, {"Unsolved": 6}, {"Unsolved": 5},
+        {"Unsolved":10}, {"Unsolved":10}, {"Unsolved":10}, {"Unsolved":10}, {"Unsolved": 3}
+    ]
+}

@@ -1,7 +1,7 @@
 //! Grid for picture.
 
 /// Enumeration of cell states
-#[derive(Clone)]
+#[derive(Clone, Serialize, Deserialize)]
 pub enum CellState {
     /// Cell is not solved yet
     Unsolved(u8),
@@ -12,6 +12,7 @@ pub enum CellState {
 }
 
 /// Stores picture grid data.
+#[derive(Serialize, Deserialize)]
 pub struct PictureGrid {
     /// Width of grid.
     pub width: u16,
