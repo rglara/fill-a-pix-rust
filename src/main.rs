@@ -10,6 +10,11 @@ extern crate serde_json;
 extern crate find_folder;
 extern crate piston_window;
 
+use std::fs::File;
+use std::io;
+
+use serde_json::error;
+
 use piston_window::types::Color;
 use piston_window::{clear, Filter, Glyphs, PistonWindow, TextureSettings, WindowSettings};
 
@@ -23,25 +28,45 @@ mod picgrid_view;
 
 const BGCOLOR: Color = [0.89, 0.87, 0.73, 1.0];
 
+fn load_file(filename: &String) -> Result<PictureGrid, i32> {
+    println!("Loading {}...", filename);
+
+    let io_err = |err: io::Error| -> i32 {
+        if let Some(raw_os_err) = err.raw_os_error() {
+            raw_os_err
+        } else {
+            1
+        }
+    };
+    let input = File::open(filename).map_err(io_err)?;
+
+    let serde_err = |err: error::Error| -> i32 {
+        match err.classify() {
+            error::Category::Io => 1001,
+            error::Category::Syntax => 1002,
+            error::Category::Data => 1003,
+            error::Category::Eof => 1004,
+        }
+    };
+    let picgrid = serde_json::from_reader(input).map_err(serde_err)?;
+    println!("{} loaded!", filename);
+    Ok(picgrid)
+}
+
 fn main() {
     let picgrid: PictureGrid;
     if let Some(filename) = std::env::args().nth(1) {
-        println!("Loading {}...", filename);
-
-        // TODO: load the real file
-        let loaded_file = "{\"width\":5,\"height\":5,\"cells\":[{\"Unsolved\":0},{\"Unsolved\":10},{\"Unsolved\":4},{\"Unsolved\":4},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":4},{\"Unsolved\":10},{\"Unsolved\":6},{\"Unsolved\":10},{\"Unsolved\":3},{\"Unsolved\":10},{\"Unsolved\":7},{\"Unsolved\":6},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":6},{\"Unsolved\":10},{\"Unsolved\":6},{\"Unsolved\":5},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":10},{\"Unsolved\":3}]}";
-
-        let deserialized_try = serde_json::from_str(&loaded_file);
-        if deserialized_try.is_ok() {
-            picgrid = deserialized_try.unwrap();
-            println!("{} loaded!", filename)
-        } else {
-            println!("Unable to load {}", filename);
-            std::process::exit(2);
-        }
+        picgrid = match load_file(&filename) {
+            Ok(pg) => pg,
+            Err(error_code) => {
+                println!("Error({}): Unable to load {}", error_code, filename);
+                std::process::exit(error_code);
+            }
+        };
     } else {
-        println!("No filename provided");
-        std::process::exit(1);
+        let error_code = 1;
+        println!("Error({}): No filename provided", error_code);
+        std::process::exit(error_code);
     }
 
     let mut picgrid_controller = PictureGridController::new(picgrid);
