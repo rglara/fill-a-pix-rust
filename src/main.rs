@@ -27,6 +27,7 @@ mod picgrid_controller;
 mod picgrid_view;
 
 const BGCOLOR: Color = [0.89, 0.87, 0.73, 1.0];
+const DEFAULT_WINDOW: [u32; 2] = [800, 600];
 
 fn load_file(filename: &String) -> Result<PictureGrid, i32> {
     println!("Loading {}...", filename);
@@ -71,9 +72,9 @@ fn main() {
 
     let mut picgrid_controller = PictureGridController::new(picgrid);
     let picgrid_view_settings = PictureGridViewSettings::new();
-    let picgrid_view = PictureGridView::new(picgrid_view_settings);
+    let mut picgrid_view = PictureGridView::new(picgrid_view_settings);
 
-    let mut window: PistonWindow = WindowSettings::new("Fill-a-Pix", [400, 400])
+    let mut window: PistonWindow = WindowSettings::new("Fill-a-Pix", DEFAULT_WINDOW)
         .exit_on_esc(true)
         .build()
         .unwrap();
@@ -87,7 +88,7 @@ fn main() {
     let mut glyphs = Glyphs::new(font, factory, texture_settings).unwrap();
 
     while let Some(event) = window.next() {
-        picgrid_controller.event(&event);
+        picgrid_controller.event(picgrid_view.grid_rect, picgrid_view.cell_size, &event);
 
         window.draw_2d(&event, |context, graphics| {
             clear(BGCOLOR, graphics);

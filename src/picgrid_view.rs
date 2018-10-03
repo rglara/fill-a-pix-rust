@@ -13,8 +13,16 @@ use PictureGridController;
 
 /// Stores picgrid view settings.
 pub struct PictureGridViewSettings {
+    /// (x,y) position of upper left corner of controls area
+    pub controls_position: [f64; 2],
     /// (x,y) position of upper left corner of grid
-    pub position: [f64; 2],
+    pub grid_position: [f64; 2],
+    /// (h,v) side margins within view port
+    pub margin: [f64; 2],
+    /// size of label text
+    pub label_size: u32,
+    /// color of control label text
+    pub label_color: Color,
     /// width/height of grid cells (only if viewport cannot be determined)
     pub cell_size: f64,
     /// color of grid borders
@@ -41,7 +49,11 @@ impl PictureGridViewSettings {
     /// Creates new picgrid view settings.
     pub fn new() -> PictureGridViewSettings {
         PictureGridViewSettings {
-            position: [30.0; 2],
+            controls_position: [30.0; 2],
+            grid_position: [360.0, 30.0],
+            margin: [30.0; 2],
+            label_size: 15,
+            label_color: [0.0, 0.0, 0.0, 1.0],
             cell_size: 50.0,
             grid_border_color: [0.4, 0.4, 0.4, 1.0],
             grid_border_width: 3.0,
@@ -60,17 +72,25 @@ impl PictureGridViewSettings {
 pub struct PictureGridView {
     /// Stores picgrid view settings.
     pub settings: PictureGridViewSettings,
+    /// Calculated cell size
+    pub cell_size: f64,
+    /// Calculated position/size of grid
+    pub grid_rect: [f64; 4],
 }
 
 impl PictureGridView {
     /// Creates a new picgrid view.
     pub fn new(settings: PictureGridViewSettings) -> PictureGridView {
-        PictureGridView { settings: settings }
+        PictureGridView {
+            settings: settings,
+            cell_size: 1.0,
+            grid_rect: [1.0; 4],
+        }
     }
 
     /// Draw picture grid.
     pub fn draw<C, G>(
-        &self,
+        &mut self,
         controller: &PictureGridController,
         glyphs: &mut C,
         c: &Context,
@@ -80,28 +100,28 @@ impl PictureGridView {
         G: Graphics<Texture = <C as CharacterCache>::Texture>,
     {
         let ref settings = self.settings;
-        let mut cell_size = settings.cell_size;
+        self.cell_size = settings.cell_size;
         if let Some(vp) = c.viewport {
-            let hcell = ((vp.rect[2] as f64) - (settings.position[0] * 2.0))
+            let hcell = ((vp.rect[2] as f64) - settings.margin[0] - settings.grid_position[0])
                 / (controller.picgrid.width as f64);
-            let vcell = ((vp.rect[3] as f64) - (settings.position[1] * 2.0))
+            let vcell = ((vp.rect[3] as f64) - (settings.margin[1] * 2.0))
                 / (controller.picgrid.height as f64);
 
-            cell_size = f64::min(hcell, vcell);
+            self.cell_size = f64::min(hcell, vcell);
         }
 
-        let grid_rect = [
-            settings.position[0],
-            settings.position[1],
-            (cell_size * f64::from(controller.picgrid.width)) + settings.grid_border_width,
-            (cell_size * f64::from(controller.picgrid.height)) + settings.grid_border_width,
+        self.grid_rect = [
+            settings.grid_position[0],
+            settings.grid_position[1],
+            (self.cell_size * f64::from(controller.picgrid.width)) + settings.grid_border_width,
+            (self.cell_size * f64::from(controller.picgrid.height)) + settings.grid_border_width,
         ];
 
         // outer grid border
         Rectangle::new_border(
             settings.grid_border_color,
             (settings.grid_border_width / 2.0).into(),
-        ).draw(grid_rect, &c.draw_state, c.transform, g);
+        ).draw(self.grid_rect, &c.draw_state, c.transform, g);
 
         // grid cells
         let cell_border = Border {
@@ -120,20 +140,20 @@ impl PictureGridView {
         );
         let mut column_ptr: u16 = 0;
         let mut row_ptr: u16 = 0;
-        let mut cell_rect = [0.0, 0.0, cell_size, cell_size];
+        let mut cell_rect = [0.0, 0.0, self.cell_size, self.cell_size];
         let grid_origin = [
-            grid_rect[0] + f64::from(settings.grid_border_width / 2.0),
-            grid_rect[1] + f64::from(settings.grid_border_width / 2.0),
+            self.grid_rect[0] + f64::from(settings.grid_border_width / 2.0),
+            self.grid_rect[1] + f64::from(settings.grid_border_width / 2.0),
         ];
-        let cell_hint_text_size = (cell_size * 0.75) as u32;
+        let cell_hint_text_size = (self.cell_size * 0.75) as u32;
 
         for state in &controller.picgrid.cells {
-            cell_rect[0] = grid_origin[0] + (f64::from(column_ptr) * cell_size);
-            cell_rect[1] = grid_origin[1] + (f64::from(row_ptr) * cell_size);
+            cell_rect[0] = grid_origin[0] + (f64::from(column_ptr) * self.cell_size);
+            cell_rect[1] = grid_origin[1] + (f64::from(row_ptr) * self.cell_size);
 
             let text_transform = c.transform.trans(
-                cell_rect[0] + (cell_size * 0.30),
-                cell_rect[1] + (cell_size * 0.75),
+                cell_rect[0] + (self.cell_size * 0.30),
+                cell_rect[1] + (self.cell_size * 0.75),
             );
 
             match state {
@@ -193,6 +213,35 @@ impl PictureGridView {
                 column_ptr = 0;
                 row_ptr += 1;
             }
+        }
+
+        let labels = vec![
+            format!("Cell Size: {:?}", &self.cell_size),
+            format!("Cursor: {:?}", &controller.cursor_pos[..]),
+            format!(
+                "Grid Cell: {:?}",
+                &match controller.cell_pos {
+                    Some(pos) => format!("{:?}", &pos[..]),
+                    None => "---".to_string(),
+                }
+            ),
+        ];
+
+        let label_graphic = Text::new_color(settings.label_color, settings.label_size);
+        let mut label_offset = settings.label_size as f64;
+        for label in labels.iter() {
+            label_graphic
+                .draw(
+                    &label,
+                    glyphs,
+                    &c.draw_state,
+                    c.transform.trans(
+                        settings.controls_position[0],
+                        settings.controls_position[1] + label_offset,
+                    ),
+                    g,
+                ).ok();
+            label_offset += (settings.label_size as f64) * 1.5;
         }
     }
 }
