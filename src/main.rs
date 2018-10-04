@@ -27,7 +27,7 @@ mod picgrid_controller;
 mod picgrid_view;
 
 const BGCOLOR: Color = [0.89, 0.87, 0.73, 1.0];
-const DEFAULT_WINDOW: [u32; 2] = [800, 600];
+const DEFAULT_WINDOW: [u32; 2] = [1440, 900];
 
 fn load_file(filename: &String) -> Result<PictureGrid, i32> {
     println!("Loading {}...", filename);

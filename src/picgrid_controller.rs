@@ -48,13 +48,15 @@ impl PictureGridController {
 
         if let Some(Button::Mouse(MouseButton::Left)) = e.press_args() {
             if let Some(pos) = self.cell_pos {
-                let new_state;
-                match self.picgrid.get(pos[0], pos[1]) {
-                    CellState::Unsolved(val) => new_state = CellState::Shaded(val),
-                    CellState::Shaded(val) => new_state = CellState::Unshaded(val),
-                    CellState::Unshaded(val) => new_state = CellState::Unsolved(val),
-                };
-                self.picgrid.set(pos[0], pos[1], new_state);
+                if let Some(cell) = self.picgrid.get(pos[0], pos[1]) {
+                    let new_state;
+                    match cell {
+                        CellState::Unsolved(val) => new_state = CellState::Shaded(val),
+                        CellState::Shaded(val) => new_state = CellState::Unshaded(val),
+                        CellState::Unshaded(val) => new_state = CellState::Unsolved(val),
+                    };
+                    self.picgrid.set(pos[0], pos[1], new_state);
+                }
             }
         }
 
@@ -74,49 +76,41 @@ impl PictureGridController {
 
         println!("Applying zeroes and nines...");
         for _index in 0..(self.picgrid.width * self.picgrid.height) {
-            let cell = self.picgrid.get(x, y);
-            let cell_hint = cell.hint();
-            if cell_hint == 0 {
-                self.picgrid
-                    .set_state(x - 1, y - 1, CellState::Unshaded(cell_hint));
-                self.picgrid
-                    .set_state(x, y - 1, CellState::Unshaded(cell_hint));
-                self.picgrid
-                    .set_state(x + 1, y - 1, CellState::Unshaded(cell_hint));
-                self.picgrid
-                    .set_state(x - 1, y, CellState::Unshaded(cell_hint));
-                self.picgrid.set_state(x, y, CellState::Unshaded(cell_hint));
-                self.picgrid
-                    .set_state(x + 1, y, CellState::Unshaded(cell_hint));
-                self.picgrid
-                    .set_state(x - 1, y + 1, CellState::Unshaded(cell_hint));
-                self.picgrid
-                    .set_state(x, y + 1, CellState::Unshaded(cell_hint));
-                self.picgrid
-                    .set_state(x + 1, y + 1, CellState::Unshaded(cell_hint));
-            } else if cell_hint == 9 {
-                self.picgrid
-                    .set_state(x - 1, y - 1, CellState::Shaded(cell_hint));
-                self.picgrid
-                    .set_state(x, y - 1, CellState::Shaded(cell_hint));
-                self.picgrid
-                    .set_state(x + 1, y - 1, CellState::Shaded(cell_hint));
-                self.picgrid
-                    .set_state(x - 1, y, CellState::Shaded(cell_hint));
-                self.picgrid.set_state(x, y, CellState::Shaded(cell_hint));
-                self.picgrid
-                    .set_state(x + 1, y, CellState::Shaded(cell_hint));
-                self.picgrid
-                    .set_state(x - 1, y + 1, CellState::Shaded(cell_hint));
-                self.picgrid
-                    .set_state(x, y + 1, CellState::Shaded(cell_hint));
-                self.picgrid
-                    .set_state(x + 1, y + 1, CellState::Shaded(cell_hint));
-            }
-            x += 1;
-            if x >= self.picgrid.width as isize {
-                x = 0;
-                y += 1;
+            if let Some(cell) = self.picgrid.get(x, y) {
+                let cell_hint = cell.hint();
+                match cell_hint {
+                    0 => {
+                        self.picgrid.fill_unshaded(x, y);
+                    }
+                    9 => {
+                        self.picgrid.fill_shaded(x, y);
+                    }
+                    6 => {
+                        if x == 0
+                            || x == (self.picgrid.width - 1) as isize
+                            || y == 0
+                            || y == (self.picgrid.height - 1) as isize
+                        {
+                            self.picgrid.fill_shaded(x, y);
+                        }
+                    }
+                    4 => {
+                        if (x == 0 && y == 0)
+                            || (x == 0 && y == (self.picgrid.height - 1) as isize)
+                            || (x == (self.picgrid.width - 1) as isize && y == 0)
+                            || (x == (self.picgrid.width - 1) as isize
+                                && y == (self.picgrid.height - 1) as isize)
+                        {
+                            self.picgrid.fill_shaded(x, y);
+                        }
+                    }
+                    _ => {}
+                }
+                x += 1;
+                if x >= self.picgrid.width as isize {
+                    x = 0;
+                    y += 1;
+                }
             }
         }
 
@@ -126,8 +120,30 @@ impl PictureGridController {
             needs_pass = false;
             println!("Easy pass #{}", num_passes);
 
+            x = 0;
+            y = 0;
             // check if the cell is "satisfied"
-
+            for _index in 0..(self.picgrid.width * self.picgrid.height) {
+                if let Some(cell) = self.picgrid.get(x, y) {
+                    let cell_hint = cell.hint();
+                    if cell_hint != PictureGrid::EMPTY && !self.picgrid.is_complete(x, y) {
+                        let cell_shaded = self.picgrid.num_shaded(x, y);
+                        let cell_unsolved = self.picgrid.num_unsolved(x, y);
+                        if cell_hint == cell_shaded {
+                            self.picgrid.fill_unshaded(x, y);
+                            needs_pass = true;
+                        } else if cell_hint == (cell_shaded + cell_unsolved) {
+                            self.picgrid.fill_shaded(x, y);
+                            needs_pass = true;
+                        }
+                    }
+                }
+                x += 1;
+                if x >= self.picgrid.width as isize {
+                    x = 0;
+                    y += 1;
+                }
+            }
             num_passes += 1;
         }
 
