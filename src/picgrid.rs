@@ -11,6 +11,17 @@ pub enum CellState {
     Unshaded(u8),
 }
 
+impl CellState {
+    /// Returns the common hint value in the enumeration
+    pub fn hint(self) -> u8 {
+        match self {
+            CellState::Unsolved(val) => val,
+            CellState::Shaded(val) => val,
+            CellState::Unshaded(val) => val,
+        }
+    }
+}
+
 /// Stores picture grid data.
 #[derive(Serialize, Deserialize)]
 pub struct PictureGrid {

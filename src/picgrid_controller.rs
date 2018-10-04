@@ -71,47 +71,66 @@ impl PictureGridController {
         println!("Solving picture grid...");
         let mut x: isize = 0;
         let mut y: isize = 0;
+
+        println!("Applying zeroes and nines...");
         for _index in 0..(self.picgrid.width * self.picgrid.height) {
-            println!("Processing ({},{})", x, y);
             let cell = self.picgrid.get(x, y);
-            match cell {
-                CellState::Unsolved(val) => match val {
-                    0 => {
-                        self.picgrid
-                            .set_state(x - 1, y - 1, CellState::Unshaded(val));
-                        self.picgrid.set_state(x, y - 1, CellState::Unshaded(val));
-                        self.picgrid
-                            .set_state(x + 1, y - 1, CellState::Unshaded(val));
-                        self.picgrid.set_state(x - 1, y, CellState::Unshaded(val));
-                        self.picgrid.set_state(x, y, CellState::Unshaded(val));
-                        self.picgrid.set_state(x + 1, y, CellState::Unshaded(val));
-                        self.picgrid
-                            .set_state(x - 1, y + 1, CellState::Unshaded(val));
-                        self.picgrid.set_state(x, y + 1, CellState::Unshaded(val));
-                        self.picgrid
-                            .set_state(x + 1, y + 1, CellState::Unshaded(val));
-                    }
-                    9 => {
-                        self.picgrid.set_state(x - 1, y - 1, CellState::Shaded(val));
-                        self.picgrid.set_state(x, y - 1, CellState::Shaded(val));
-                        self.picgrid.set_state(x + 1, y - 1, CellState::Shaded(val));
-                        self.picgrid.set_state(x - 1, y, CellState::Shaded(val));
-                        self.picgrid.set_state(x, y, CellState::Shaded(val));
-                        self.picgrid.set_state(x + 1, y, CellState::Shaded(val));
-                        self.picgrid.set_state(x - 1, y + 1, CellState::Shaded(val));
-                        self.picgrid.set_state(x, y + 1, CellState::Shaded(val));
-                        self.picgrid.set_state(x + 1, y + 1, CellState::Shaded(val));
-                    }
-                    _ => {}
-                },
-                _ => {}
+            let cell_hint = cell.hint();
+            if cell_hint == 0 {
+                self.picgrid
+                    .set_state(x - 1, y - 1, CellState::Unshaded(cell_hint));
+                self.picgrid
+                    .set_state(x, y - 1, CellState::Unshaded(cell_hint));
+                self.picgrid
+                    .set_state(x + 1, y - 1, CellState::Unshaded(cell_hint));
+                self.picgrid
+                    .set_state(x - 1, y, CellState::Unshaded(cell_hint));
+                self.picgrid.set_state(x, y, CellState::Unshaded(cell_hint));
+                self.picgrid
+                    .set_state(x + 1, y, CellState::Unshaded(cell_hint));
+                self.picgrid
+                    .set_state(x - 1, y + 1, CellState::Unshaded(cell_hint));
+                self.picgrid
+                    .set_state(x, y + 1, CellState::Unshaded(cell_hint));
+                self.picgrid
+                    .set_state(x + 1, y + 1, CellState::Unshaded(cell_hint));
+            } else if cell_hint == 9 {
+                self.picgrid
+                    .set_state(x - 1, y - 1, CellState::Shaded(cell_hint));
+                self.picgrid
+                    .set_state(x, y - 1, CellState::Shaded(cell_hint));
+                self.picgrid
+                    .set_state(x + 1, y - 1, CellState::Shaded(cell_hint));
+                self.picgrid
+                    .set_state(x - 1, y, CellState::Shaded(cell_hint));
+                self.picgrid.set_state(x, y, CellState::Shaded(cell_hint));
+                self.picgrid
+                    .set_state(x + 1, y, CellState::Shaded(cell_hint));
+                self.picgrid
+                    .set_state(x - 1, y + 1, CellState::Shaded(cell_hint));
+                self.picgrid
+                    .set_state(x, y + 1, CellState::Shaded(cell_hint));
+                self.picgrid
+                    .set_state(x + 1, y + 1, CellState::Shaded(cell_hint));
             }
             x += 1;
-            if x > self.picgrid.width as isize {
+            if x >= self.picgrid.width as isize {
                 x = 0;
                 y += 1;
             }
         }
+
+        let mut num_passes = 1;
+        let mut needs_pass = true;
+        while needs_pass {
+            needs_pass = false;
+            println!("Easy pass #{}", num_passes);
+
+            // check if the cell is "satisfied"
+
+            num_passes += 1;
+        }
+
         println!("Done with algorithm!");
     }
 }
