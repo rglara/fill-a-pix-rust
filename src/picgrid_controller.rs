@@ -1,7 +1,7 @@
 //! PictureGrid controller.
 
 use piston_window::generic_event::GenericEvent;
-use piston_window::{Button, MouseButton};
+use piston_window::{Button, Key, MouseButton};
 
 use picgrid::CellState;
 
@@ -57,5 +57,18 @@ impl PictureGridController {
                 self.picgrid.set(pos[0], pos[1], new_state);
             }
         }
+
+        if let Some(Button::Keyboard(key)) = e.press_args() {
+            match key {
+                Key::S => self.run_solver(),
+                _ => {}
+            }
+        }
+    }
+
+    /// Executes solving algorithm
+    fn run_solver(&self) {
+        println!("Solving picture grid...");
+        println!("Done with algorithm!");
     }
 }

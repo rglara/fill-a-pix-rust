@@ -225,6 +225,8 @@ impl PictureGridView {
                     None => "---".to_string(),
                 }
             ),
+            "".to_string(),
+            "Press 's' to use solving algorithm".to_string(),
         ];
 
         let label_graphic = Text::new_color(settings.label_color, settings.label_size);
