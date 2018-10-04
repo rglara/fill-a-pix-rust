@@ -12,7 +12,7 @@ pub struct PictureGridController {
     /// Stores the picture grid state.
     pub picgrid: PictureGrid,
     /// Stores the last cell position (if any)
-    pub cell_pos: Option<[usize; 2]>,
+    pub cell_pos: Option<[isize; 2]>,
     /// Stores the last cursor position
     pub cursor_pos: [f64; 2],
 }
@@ -38,8 +38,8 @@ impl PictureGridController {
             {
                 // we're within the grid, so see what cell we're in (size + border width)
                 self.cell_pos = Some([
-                    ((self.cursor_pos[0] - grid_rect[0]) / (cell_size + 1.0)).trunc() as usize,
-                    ((self.cursor_pos[1] - grid_rect[1]) / (cell_size + 1.0)).trunc() as usize,
+                    ((self.cursor_pos[0] - grid_rect[0]) / (cell_size + 1.0)).trunc() as isize,
+                    ((self.cursor_pos[1] - grid_rect[1]) / (cell_size + 1.0)).trunc() as isize,
                 ]);
             } else {
                 self.cell_pos = None;
@@ -60,15 +60,58 @@ impl PictureGridController {
 
         if let Some(Button::Keyboard(key)) = e.press_args() {
             match key {
-                Key::S => self.run_solver(),
+                Key::X => self.run_solver(),
                 _ => {}
             }
         }
     }
 
     /// Executes solving algorithm
-    fn run_solver(&self) {
+    fn run_solver(&mut self) {
         println!("Solving picture grid...");
+        let mut x: isize = 0;
+        let mut y: isize = 0;
+        for _index in 0..(self.picgrid.width * self.picgrid.height) {
+            println!("Processing ({},{})", x, y);
+            let cell = self.picgrid.get(x, y);
+            match cell {
+                CellState::Unsolved(val) => match val {
+                    0 => {
+                        self.picgrid
+                            .set_state(x - 1, y - 1, CellState::Unshaded(val));
+                        self.picgrid.set_state(x, y - 1, CellState::Unshaded(val));
+                        self.picgrid
+                            .set_state(x + 1, y - 1, CellState::Unshaded(val));
+                        self.picgrid.set_state(x - 1, y, CellState::Unshaded(val));
+                        self.picgrid.set_state(x, y, CellState::Unshaded(val));
+                        self.picgrid.set_state(x + 1, y, CellState::Unshaded(val));
+                        self.picgrid
+                            .set_state(x - 1, y + 1, CellState::Unshaded(val));
+                        self.picgrid.set_state(x, y + 1, CellState::Unshaded(val));
+                        self.picgrid
+                            .set_state(x + 1, y + 1, CellState::Unshaded(val));
+                    }
+                    9 => {
+                        self.picgrid.set_state(x - 1, y - 1, CellState::Shaded(val));
+                        self.picgrid.set_state(x, y - 1, CellState::Shaded(val));
+                        self.picgrid.set_state(x + 1, y - 1, CellState::Shaded(val));
+                        self.picgrid.set_state(x - 1, y, CellState::Shaded(val));
+                        self.picgrid.set_state(x, y, CellState::Shaded(val));
+                        self.picgrid.set_state(x + 1, y, CellState::Shaded(val));
+                        self.picgrid.set_state(x - 1, y + 1, CellState::Shaded(val));
+                        self.picgrid.set_state(x, y + 1, CellState::Shaded(val));
+                        self.picgrid.set_state(x + 1, y + 1, CellState::Shaded(val));
+                    }
+                    _ => {}
+                },
+                _ => {}
+            }
+            x += 1;
+            if x > self.picgrid.width as isize {
+                x = 0;
+                y += 1;
+            }
+        }
         println!("Done with algorithm!");
     }
 }

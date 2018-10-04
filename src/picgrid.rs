@@ -31,7 +31,7 @@ impl PictureGrid {
         PictureGrid {
             width: width,
             height: height,
-            cells: vec![CellState::Unsolved(PictureGrid::EMPTY); usize::from(width * height)],
+            cells: vec![CellState::Unsolved(PictureGrid::EMPTY); (width * height) as usize],
         }
     }
 
@@ -42,13 +42,36 @@ impl PictureGrid {
     }
 
     /// Get individual cell value
-    pub fn get(&self, x: usize, y: usize) -> CellState {
-        self.cells[y * self.width as usize + x].clone()
+    pub fn get(&self, x: isize, y: isize) -> CellState {
+        self.cells[(y * self.width as isize + x) as usize].clone()
     }
 
     /// Set individual cell value
-    pub fn set(&mut self, x: usize, y: usize, value: CellState) -> &Self {
-        self.cells[y * self.width as usize + x] = value;
+    pub fn set(&mut self, x: isize, y: isize, value: CellState) -> &Self {
+        if x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize {
+            self.cells[(y * self.width as isize + x) as usize] = value;
+        }
+        self
+    }
+
+    /// Set individual cell value state only (value is unchanged)
+    pub fn set_state(&mut self, x: isize, y: isize, value: CellState) -> &Self {
+        if x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize {
+            let index = (y * self.width as isize + x) as usize;
+            let existing_hint;
+            match self.cells[index] {
+                CellState::Unsolved(hint) => existing_hint = hint,
+                CellState::Shaded(hint) => existing_hint = hint,
+                CellState::Unshaded(hint) => existing_hint = hint,
+            }
+            let new_value;
+            match value {
+                CellState::Unsolved(_hint) => new_value = CellState::Unsolved(existing_hint),
+                CellState::Shaded(_hint) => new_value = CellState::Shaded(existing_hint),
+                CellState::Unshaded(_hint) => new_value = CellState::Unshaded(existing_hint),
+            }
+            self.cells[(y * self.width as isize + x) as usize] = new_value;
+        }
         self
     }
 }

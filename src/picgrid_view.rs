@@ -216,17 +216,17 @@ impl PictureGridView {
         }
 
         let labels = vec![
-            format!("Cell Size: {:?}", &self.cell_size),
-            format!("Cursor: {:?}", &controller.cursor_pos[..]),
-            format!(
-                "Grid Cell: {:?}",
-                &match controller.cell_pos {
-                    Some(pos) => format!("{:?}", &pos[..]),
-                    None => "---".to_string(),
-                }
-            ),
-            "".to_string(),
-            "Press 's' to use solving algorithm".to_string(),
+            // format!("Cell Size: {:?}", &self.cell_size),
+            // format!("Cursor: {:?}", &controller.cursor_pos[..]),
+            // format!(
+            //     "Grid Cell: {:?}",
+            //     &match controller.cell_pos {
+            //         Some(pos) => format!("{:?}", &pos[..]),
+            //         None => "---".to_string(),
+            //     }
+            // ),
+            // "".to_string(),
+            "Press 'x' to use solving algorithm".to_string(),
         ];
 
         let label_graphic = Text::new_color(settings.label_color, settings.label_size);
