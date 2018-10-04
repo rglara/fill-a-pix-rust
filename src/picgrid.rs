@@ -35,9 +35,20 @@ impl PictureGrid {
         }
     }
 
-    /// Sets cell values
-    pub fn with_values(mut self, values: Vec<CellState>) -> Self {
+    /// Sets all cell values
+    pub fn with_values(&mut self, values: Vec<CellState>) -> &Self {
         self.cells = values;
+        self
+    }
+
+    /// Get individual cell value
+    pub fn get(&self, x: usize, y: usize) -> CellState {
+        self.cells[y * self.width as usize + x].clone()
+    }
+
+    /// Set individual cell value
+    pub fn set(&mut self, x: usize, y: usize, value: CellState) -> &Self {
+        self.cells[y * self.width as usize + x] = value;
         self
     }
 }
