@@ -49,9 +49,9 @@ impl PictureGridViewSettings {
     /// Creates new picgrid view settings.
     pub fn new() -> PictureGridViewSettings {
         PictureGridViewSettings {
-            controls_position: [30.0; 2],
-            grid_position: [360.0, 30.0],
-            margin: [30.0; 2],
+            controls_position: [15.0; 2],
+            grid_position: [260.0, 15.0],
+            margin: [15.0; 2],
             label_size: 15,
             label_color: [0.0, 0.0, 0.0, 1.0],
             cell_size: 50.0,
