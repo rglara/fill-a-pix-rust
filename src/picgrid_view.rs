@@ -4,6 +4,8 @@ use piston_window::types::Color;
 
 /// Stores picgrid view settings.
 pub struct PictureGridViewSettings {
+    /// background color
+    pub background_color: Color,
     /// (x,y) position of upper left corner of controls area
     pub controls_position: [f64; 2],
     /// (x,y) position of upper left corner of grid
@@ -40,6 +42,7 @@ impl PictureGridViewSettings {
     /// Creates new picgrid view settings.
     pub fn new() -> PictureGridViewSettings {
         PictureGridViewSettings {
+            background_color: [0.89, 0.87, 0.73, 1.0],
             controls_position: [15.0; 2],
             grid_position: [260.0, 15.0],
             margin: [15.0; 2],

@@ -8,7 +8,6 @@ use piston_window::generic_event::GenericEvent;
 use piston_window::line::Line;
 use piston_window::rectangle::{Border, Rectangle};
 use piston_window::text::Text;
-use piston_window::types::Color;
 use piston_window::{
     clear, Button, Filter, Glyphs, Graphics, Key, MouseButton, PistonWindow, TextureSettings,
     Transformed,
@@ -28,8 +27,6 @@ pub struct PictureGridController {
 }
 
 impl PictureGridController {
-    const BGCOLOR: Color = [0.89, 0.87, 0.73, 1.0];
-
     /// Creates a new picgrid controller.
     pub fn new(window: PistonWindow, picgrid: PictureGrid) -> PictureGridController {
         PictureGridController {
@@ -106,19 +103,40 @@ impl PictureGridController {
 
         if let Some(Button::Keyboard(key)) = e.press_args() {
             match key {
-                Key::X => PictureGridController::run_solver(picgrid),
+                Key::X => {
+                    PictureGridController::run_solver(window, picgrid, settings, info, glyphs, e)
+                }
                 _ => {}
             }
         }
 
+        PictureGridController::redraw(window, picgrid, settings, info, glyphs, e);
+    }
+
+    /// Redraw screen
+    fn redraw<E: GenericEvent>(
+        window: &mut PistonWindow,
+        picgrid: &mut PictureGrid,
+        settings: &PictureGridViewSettings,
+        info: &mut PictureGridView,
+        glyphs: &mut Glyphs,
+        e: &E,
+    ) {
         window.draw_2d(e, |context, graphics| {
-            clear(PictureGridController::BGCOLOR, graphics);
+            clear(settings.background_color, graphics);
             PictureGridController::draw(&picgrid, &settings, info, glyphs, &context, graphics);
         });
     }
 
     /// Executes solving algorithm
-    fn run_solver(picgrid: &mut PictureGrid) {
+    fn run_solver<E: GenericEvent>(
+        window: &mut PistonWindow,
+        picgrid: &mut PictureGrid,
+        settings: &PictureGridViewSettings,
+        info: &mut PictureGridView,
+        glyphs: &mut Glyphs,
+        e: &E,
+    ) {
         println!("Solving picture grid...");
         let mut x: isize = 0;
         let mut y: isize = 0;
@@ -130,9 +148,11 @@ impl PictureGridController {
                 match cell_hint {
                     0 => {
                         picgrid.fill_unshaded(x, y);
+                        PictureGridController::redraw(window, picgrid, settings, info, glyphs, e);
                     }
                     9 => {
                         picgrid.fill_shaded(x, y);
+                        PictureGridController::redraw(window, picgrid, settings, info, glyphs, e);
                     }
                     6 => {
                         if x == 0
@@ -141,6 +161,9 @@ impl PictureGridController {
                             || y == (picgrid.height - 1) as isize
                         {
                             picgrid.fill_shaded(x, y);
+                            PictureGridController::redraw(
+                                window, picgrid, settings, info, glyphs, e,
+                            );
                         }
                     }
                     4 => {
@@ -151,6 +174,9 @@ impl PictureGridController {
                                 && y == (picgrid.height - 1) as isize)
                         {
                             picgrid.fill_shaded(x, y);
+                            PictureGridController::redraw(
+                                window, picgrid, settings, info, glyphs, e,
+                            );
                         }
                     }
                     _ => {}
@@ -180,9 +206,15 @@ impl PictureGridController {
                         let cell_unsolved = picgrid.num_unsolved(x, y);
                         if cell_hint == cell_shaded {
                             picgrid.fill_unshaded(x, y);
+                            PictureGridController::redraw(
+                                window, picgrid, settings, info, glyphs, e,
+                            );
                             needs_pass = true;
                         } else if cell_hint == (cell_shaded + cell_unsolved) {
                             picgrid.fill_shaded(x, y);
+                            PictureGridController::redraw(
+                                window, picgrid, settings, info, glyphs, e,
+                            );
                             needs_pass = true;
                         }
                     }
