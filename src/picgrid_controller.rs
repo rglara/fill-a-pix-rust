@@ -15,40 +15,16 @@ use piston_window::{
 };
 
 use picgrid::CellState;
-use picgrid_view::PictureGridViewSettings;
+use picgrid_view::{PictureGridView, PictureGridViewSettings};
 
 use PictureGrid;
-
-/// Tracking information for window details
-struct PictureGridView {
-    /// Stores the last cell position (if any)
-    pub cell_pos: Option<[isize; 2]>,
-    /// Stores the last cursor position
-    pub cursor_pos: [f64; 2],
-    /// Calculated cell size
-    pub cell_size: f64,
-    /// Calculated position/size of grid
-    pub grid_rect: [f64; 4],
-}
-
-impl PictureGridView {
-    /// Creates a new picgrid view.
-    pub fn new() -> PictureGridView {
-        PictureGridView {
-            cell_pos: None,
-            cursor_pos: [0.0; 2],
-            cell_size: 1.0,
-            grid_rect: [1.0; 4],
-        }
-    }
-}
 
 /// Handles events for Fill-a-Pix grid.
 pub struct PictureGridController {
     /// Stores window information for GUI
     window: PistonWindow,
     /// Stores the picture grid state.
-    pub picgrid: PictureGrid,
+    picgrid: PictureGrid,
 }
 
 impl PictureGridController {
