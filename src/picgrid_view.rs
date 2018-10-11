@@ -142,8 +142,6 @@ impl PictureGridView {
             settings.cell_border_width,
         );
         let current_cell = Rectangle::new(settings.cell_current_color);
-        let mut column_ptr: u16 = 0;
-        let mut row_ptr: u16 = 0;
         let mut cell_rect = [0.0, 0.0, self.cell_size, self.cell_size];
         let grid_origin = [
             self.grid_rect[0] + f64::from(settings.grid_border_width / 2.0),
@@ -151,7 +149,10 @@ impl PictureGridView {
         ];
         let cell_hint_text_size = (self.cell_size * 0.75) as u32;
 
-        for state in &controller.picgrid.cells {
+        for (index, state) in controller.picgrid.cells.iter() {
+            let column_ptr: u16 = (*index % (controller.picgrid.width as isize)) as u16;
+            let row_ptr: u16 = ((*index as u16) - column_ptr) / controller.picgrid.width;
+
             cell_rect[0] = grid_origin[0] + (f64::from(column_ptr) * self.cell_size);
             cell_rect[1] = grid_origin[1] + (f64::from(row_ptr) * self.cell_size);
 
@@ -216,12 +217,6 @@ impl PictureGridView {
                 if (pos[0] - 1 == column_ptr as isize) && (pos[1] == row_ptr as isize) {
                     current_cell.draw(cell_rect, &c.draw_state, c.transform, g);
                 }
-            }
-
-            column_ptr += 1;
-            if column_ptr == controller.picgrid.width {
-                column_ptr = 0;
-                row_ptr += 1;
             }
         }
 

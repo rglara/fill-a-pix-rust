@@ -1,11 +1,11 @@
 {
     "width": 5,
     "height": 5,
-    "cells": [
-        {"Unshaded": 0}, {"Unshaded":10}, {"Shaded":   4}, {"Shaded":   4}, {"Unshaded":10},
-        {"Unshaded":10}, {"Unshaded": 4}, {"Shaded":  10}, {"Shaded":   6}, {"Unshaded":10},
-        {"Unsolved": 3}, {"Unsolved":10}, {"Unsolved": 7}, {"Shaded":   6}, {"Shaded":  10},
-        {"Unsolved":10}, {"Unsolved": 6}, {"Unsolved":10}, {"Unsolved": 6}, {"Unsolved": 5},
-        {"Unsolved":10}, {"Unsolved":10}, {"Unsolved":10}, {"Unsolved":10}, {"Unsolved": 3}
-    ]
+    "cells": {
+         "0": {"Unshaded": 0},  "1": {"Unshaded":10},  "2": {"Shaded":   4},  "3": {"Shaded":   4},  "4": {"Unshaded":10},
+         "5": {"Unshaded":10},  "6": {"Unshaded": 4},  "7": {"Shaded":  10},  "8": {"Shaded":   6},  "9": {"Unshaded":10},
+        "10": {"Unsolved": 3}, "11": {"Unsolved":10}, "12": {"Unsolved": 7}, "13": {"Shaded":   6}, "14": {"Shaded":  10},
+        "15": {"Unsolved":10}, "16": {"Unsolved": 6}, "17": {"Unsolved":10}, "18": {"Unsolved": 6}, "19": {"Unsolved": 5},
+        "20": {"Unsolved":10}, "21": {"Unsolved":10}, "22": {"Unsolved":10}, "23": {"Unsolved":10}, "24": {"Unsolved": 3}
+    }
 }

@@ -1,5 +1,7 @@
 //! Grid for picture.
 
+use std::collections::HashMap;
+
 /// Enumeration of cell states
 #[derive(Copy, Clone, Serialize, Deserialize)]
 pub enum CellState {
@@ -30,7 +32,7 @@ pub struct PictureGrid {
     /// Height of grid.
     pub height: u16,
     /// Stores the content of the grid cells.
-    pub cells: Vec<CellState>,
+    pub cells: HashMap<isize, CellState>,
 }
 
 impl PictureGrid {
@@ -42,12 +44,13 @@ impl PictureGrid {
         PictureGrid {
             width: width,
             height: height,
-            cells: vec![CellState::Unsolved(PictureGrid::EMPTY); (width * height) as usize],
+            cells: HashMap::with_capacity((width * height) as usize),
+            //vec![CellState::Unsolved(PictureGrid::EMPTY); (width * height) as usize],
         }
     }
 
     /// Sets all cell values
-    pub fn with_values(&mut self, values: Vec<CellState>) -> &Self {
+    pub fn with_values(&mut self, values: HashMap<isize, CellState>) -> &Self {
         self.cells = values;
         self
     }
@@ -56,7 +59,7 @@ impl PictureGrid {
     pub fn get(&self, x: isize, y: isize) -> Option<CellState> {
         let mut ret_val = Some(CellState::Unshaded(PictureGrid::EMPTY));
         if x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize {
-            ret_val = Some(self.cells[(y * self.width as isize + x) as usize].clone());
+            ret_val = Some(self.cells[&(y * self.width as isize + x)].clone());
         }
         ret_val
     }
@@ -84,7 +87,7 @@ impl PictureGrid {
     /// Set individual cell value
     pub fn set(&mut self, x: isize, y: isize, value: CellState) -> &Self {
         if x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize {
-            self.cells[(y * self.width as isize + x) as usize] = value;
+            self.cells.insert(y * self.width as isize + x, value);
         }
         self
     }
@@ -98,9 +101,9 @@ impl PictureGrid {
         unsolved_only: bool,
     ) -> &Self {
         if x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize {
-            let index = (y * self.width as isize + x) as usize;
+            let index = y * self.width as isize + x;
             let mut existing_hint: Option<u8> = None;
-            match self.cells[index] {
+            match self.cells[&index] {
                 CellState::Unsolved(hint) => existing_hint = Some(hint),
                 CellState::Shaded(hint) => {
                     if !unsolved_only {
@@ -120,7 +123,7 @@ impl PictureGrid {
                     CellState::Shaded(_hint) => new_value = CellState::Shaded(hint),
                     CellState::Unshaded(_hint) => new_value = CellState::Unshaded(hint),
                 }
-                self.cells[index] = new_value;
+                self.cells.insert(index, new_value);
             }
         }
         self
