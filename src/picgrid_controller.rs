@@ -1,5 +1,8 @@
 //! PictureGrid controller.
 
+use std::thread;
+use std::time::Duration;
+
 use find_folder;
 
 use piston_window::character::CharacterCache;
@@ -47,6 +50,22 @@ impl PictureGridController {
         let settings = PictureGridViewSettings::new();
         let mut info = PictureGridView::new();
 
+        use piston_window::{ButtonArgs, ButtonState, Event, Input};
+        use std::sync::mpsc;
+
+        let (tx, rx) = mpsc::channel();
+
+        thread::spawn(move || loop {
+            let event = Event::Input(Input::Button(ButtonArgs {
+                state: ButtonState::Press,
+                button: Button::Keyboard(Key::A),
+                scancode: None,
+            }));
+            tx.send(event).unwrap();
+            thread::sleep(Duration::from_millis(10));
+        });
+
+        let mut thread_events = rx.iter();
         while let Some(event) = self.window.next() {
             PictureGridController::event(
                 &mut self.window,
@@ -56,6 +75,17 @@ impl PictureGridController {
                 &mut glyphs,
                 &event,
             );
+
+            if let Some(event) = thread_events.next() {
+                PictureGridController::event(
+                    &mut self.window,
+                    &mut self.picgrid,
+                    &settings,
+                    &mut info,
+                    &mut glyphs,
+                    &event,
+                );
+            }
         }
     }
 
@@ -106,7 +136,9 @@ impl PictureGridController {
                 Key::X => {
                     PictureGridController::run_solver(window, picgrid, settings, info, glyphs, e)
                 }
-                _ => {}
+                _ => {
+                    println!("UNHANDLED: {:?}", key);
+                }
             }
         }
 
