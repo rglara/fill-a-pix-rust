@@ -215,19 +215,17 @@ impl PictureGridView {
             }
         }
 
-        let labels = vec![
-            // format!("Cell Size: {:?}", &self.cell_size),
-            // format!("Cursor: {:?}", &controller.cursor_pos[..]),
-            // format!(
-            //     "Grid Cell: {:?}",
-            //     &match controller.cell_pos {
-            //         Some(pos) => format!("{:?}", &pos[..]),
-            //         None => "---".to_string(),
-            //     }
-            // ),
-            // "".to_string(),
-            "Press 'x' to use solving algorithm".to_string(),
-        ];
+        let labels = controller.messages.to_vec();
+        // labels.push("".to_string());
+        // labels.push(format!("Cell Size: {:?}", &self.cell_size));
+        // labels.push(format!("Cursor: {:?}", &controller.cursor_pos[..]));
+        // labels.push(format!(
+        //     "Grid Cell: {:?}",
+        //     &match controller.cell_pos {
+        //         Some(pos) => format!("{:?}", &pos[..]),
+        //         None => "---".to_string(),
+        //     }
+        // ));
 
         let label_graphic = Text::new_color(settings.label_color, settings.label_size);
         let mut label_offset = settings.label_size as f64;

@@ -16,7 +16,9 @@ use std::io;
 use serde_json::error;
 
 use piston_window::types::Color;
-use piston_window::{clear, Filter, Glyphs, PistonWindow, TextureSettings, WindowSettings};
+use piston_window::{
+    clear, /*EventLoop,*/ Filter, Glyphs, PistonWindow, TextureSettings, WindowSettings,
+};
 
 pub use picgrid::{CellState, PictureGrid};
 pub use picgrid_controller::PictureGridController;
@@ -28,6 +30,7 @@ mod picgrid_view;
 
 const BGCOLOR: Color = [0.89, 0.87, 0.73, 1.0];
 const DEFAULT_WINDOW: [u32; 2] = [1440, 900];
+// const UPDATES_PER_SEC: u64 = 240;
 
 fn load_file(filename: &String) -> Result<PictureGrid, i32> {
     println!("Loading {}...", filename);
@@ -79,6 +82,7 @@ fn main() {
         .build()
         .unwrap();
 
+    // window.set_ups(UPDATES_PER_SEC);
     let assets = find_folder::Search::ParentsThenKids(3, 3)
         .for_folder("assets")
         .unwrap();
