@@ -1,7 +1,7 @@
 //! Grid for picture.
 
 /// Enumeration of cell states
-#[derive(Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub enum CellState {
     /// Cell is not solved yet
     Unsolved(u8),
@@ -59,6 +59,26 @@ impl PictureGrid {
             ret_val = Some(self.cells[(y * self.width as isize + x) as usize].clone());
         }
         ret_val
+    }
+
+    /// Get next incomplete cell, starting at (x,y) (without wrapping around)
+    pub fn next_incomplete(&self, x: isize, y: isize) -> (isize, isize, Option<CellState>) {
+        let mut next_x = x;
+        let mut next_y = y;
+        while (next_x < (self.width as isize)) && (next_y < (self.height as isize)) {
+            if let Some(cell) = self.get(next_x, next_y) {
+                let cell_hint = cell.hint();
+                if cell_hint != PictureGrid::EMPTY && !self.is_complete(next_x, next_y) {
+                    return (next_x, next_y, Some(cell));
+                }
+            }
+            next_x += 1;
+            if next_x >= self.width as isize {
+                next_x = 0;
+                next_y += 1;
+            }
+        }
+        (x, y, None)
     }
 
     /// Set individual cell value

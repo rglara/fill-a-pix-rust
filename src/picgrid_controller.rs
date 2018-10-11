@@ -94,19 +94,23 @@ impl PictureGridController {
                         self.messages.pop();
                     }
 
-                    if let Some(cell) = self.picgrid.get(x, y) {
+                    let (nx, ny, ncell) = self.picgrid.next_incomplete(x, y);
+                    if let Some(cell) = ncell {
+                        x = nx;
+                        y = ny;
                         let cell_hint = cell.hint();
-                        if cell_hint != PictureGrid::EMPTY && !self.picgrid.is_complete(x, y) {
-                            let cell_shaded = self.picgrid.num_shaded(x, y);
-                            let cell_unsolved = self.picgrid.num_unsolved(x, y);
-                            if cell_hint == cell_shaded {
-                                self.picgrid.fill_unshaded(x, y);
-                                self.algorithm_needs_pass = true;
-                            } else if cell_hint == (cell_shaded + cell_unsolved) {
-                                self.picgrid.fill_shaded(x, y);
-                                self.algorithm_needs_pass = true;
-                            }
+                        let cell_shaded = self.picgrid.num_shaded(x, y);
+                        let cell_unsolved = self.picgrid.num_unsolved(x, y);
+                        if cell_hint == cell_shaded {
+                            self.picgrid.fill_unshaded(x, y);
+                            self.algorithm_needs_pass = true;
+                        } else if cell_hint == (cell_shaded + cell_unsolved) {
+                            self.picgrid.fill_shaded(x, y);
+                            self.algorithm_needs_pass = true;
                         }
+                    } else {
+                        x = -1;
+                        y = 0;
                     }
 
                     x += 1;
@@ -128,86 +132,4 @@ impl PictureGridController {
             }
         }
     }
-
-    // /// Executes solving algorithm
-    // fn run_solver(&mut self) {
-    //     println!("Solving picture grid...");
-    //     let mut x: isize = 0;
-    //     let mut y: isize = 0;
-
-    //     println!("Applying zeroes and nines...");
-    //     for _index in 0..(self.picgrid.width * self.picgrid.height) {
-    //         if let Some(cell) = self.picgrid.get(x, y) {
-    //             let cell_hint = cell.hint();
-    //             match cell_hint {
-    //                 0 => {
-    //                     self.picgrid.fill_unshaded(x, y);
-    //                 }
-    //                 9 => {
-    //                     self.picgrid.fill_shaded(x, y);
-    //                 }
-    //                 6 => {
-    //                     if x == 0
-    //                         || x == (self.picgrid.width - 1) as isize
-    //                         || y == 0
-    //                         || y == (self.picgrid.height - 1) as isize
-    //                     {
-    //                         self.picgrid.fill_shaded(x, y);
-    //                     }
-    //                 }
-    //                 4 => {
-    //                     if (x == 0 && y == 0)
-    //                         || (x == 0 && y == (self.picgrid.height - 1) as isize)
-    //                         || (x == (self.picgrid.width - 1) as isize && y == 0)
-    //                         || (x == (self.picgrid.width - 1) as isize
-    //                             && y == (self.picgrid.height - 1) as isize)
-    //                     {
-    //                         self.picgrid.fill_shaded(x, y);
-    //                     }
-    //                 }
-    //                 _ => {}
-    //             }
-    //             x += 1;
-    //             if x >= self.picgrid.width as isize {
-    //                 x = 0;
-    //                 y += 1;
-    //             }
-    //         }
-    //     }
-
-    //     let mut num_passes = 1;
-    //     let mut needs_pass = true;
-    //     while needs_pass {
-    //         needs_pass = false;
-    //         println!("Easy pass #{}", num_passes);
-
-    //         x = 0;
-    //         y = 0;
-    //         // check if the cell is "satisfied"
-    //         for _index in 0..(self.picgrid.width * self.picgrid.height) {
-    //             if let Some(cell) = self.picgrid.get(x, y) {
-    //                 let cell_hint = cell.hint();
-    //                 if cell_hint != PictureGrid::EMPTY && !self.picgrid.is_complete(x, y) {
-    //                     let cell_shaded = self.picgrid.num_shaded(x, y);
-    //                     let cell_unsolved = self.picgrid.num_unsolved(x, y);
-    //                     if cell_hint == cell_shaded {
-    //                         self.picgrid.fill_unshaded(x, y);
-    //                         needs_pass = true;
-    //                     } else if cell_hint == (cell_shaded + cell_unsolved) {
-    //                         self.picgrid.fill_shaded(x, y);
-    //                         needs_pass = true;
-    //                     }
-    //                 }
-    //             }
-    //             x += 1;
-    //             if x >= self.picgrid.width as isize {
-    //                 x = 0;
-    //                 y += 1;
-    //             }
-    //         }
-    //         num_passes += 1;
-    //     }
-
-    //     println!("Done with algorithm!");
-    // }
 }
