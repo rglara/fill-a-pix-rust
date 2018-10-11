@@ -43,6 +43,8 @@ pub struct PictureGridViewSettings {
     pub cell_solved_unshaded_hint_text_color: Color,
     /// background color of cell (when cell is solved as unshaded)
     pub cell_solved_unshaded_background_color: Color,
+    /// color of current cell being processed by algorithm
+    pub cell_current_color: Color,
 }
 
 impl PictureGridViewSettings {
@@ -64,6 +66,7 @@ impl PictureGridViewSettings {
             cell_solved_shaded_background_color: [0.0, 0.0, 0.0, 1.0],
             cell_solved_unshaded_hint_text_color: [0.5, 0.5, 0.5, 1.0],
             cell_solved_unshaded_background_color: [0.9, 0.9, 0.9, 1.0],
+            cell_current_color: [1.0, 0.0, 0.0, 1.0],
         }
     }
 }
@@ -138,6 +141,7 @@ impl PictureGridView {
             settings.cell_solved_unshaded_hint_text_color,
             settings.cell_border_width,
         );
+        let current_cell = Rectangle::new(settings.cell_current_color);
         let mut column_ptr: u16 = 0;
         let mut row_ptr: u16 = 0;
         let mut cell_rect = [0.0, 0.0, self.cell_size, self.cell_size];
@@ -205,6 +209,12 @@ impl PictureGridView {
                         c.transform,
                         g,
                     );
+                }
+            }
+
+            if let Some(pos) = &controller.cell_pos {
+                if (pos[0] - 1 == column_ptr as isize) && (pos[1] == row_ptr as isize) {
+                    current_cell.draw(cell_rect, &c.draw_state, c.transform, g);
                 }
             }
 
