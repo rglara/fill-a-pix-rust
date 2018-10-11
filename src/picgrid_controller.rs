@@ -38,33 +38,35 @@ impl PictureGridController {
 
     /// Handles events.
     pub fn event<E: GenericEvent>(&mut self, grid_rect: [f64; 4], cell_size: f64, e: &E) {
-        if let Some(cp) = e.mouse_cursor_args() {
-            self.cursor_pos = cp;
-            if self.cursor_pos[0] > grid_rect[0]
-                && self.cursor_pos[1] > grid_rect[1]
-                && self.cursor_pos[0] < (grid_rect[0] + grid_rect[2])
-                && self.cursor_pos[1] < (grid_rect[1] + grid_rect[3])
-            {
-                // we're within the grid, so see what cell we're in (size + border width)
-                self.cell_pos = Some([
-                    ((self.cursor_pos[0] - grid_rect[0]) / (cell_size + 1.0)).trunc() as isize,
-                    ((self.cursor_pos[1] - grid_rect[1]) / (cell_size + 1.0)).trunc() as isize,
-                ]);
-            } else {
-                self.cell_pos = None;
+        if !self.is_solving {
+            if let Some(cp) = e.mouse_cursor_args() {
+                self.cursor_pos = cp;
+                if self.cursor_pos[0] > grid_rect[0]
+                    && self.cursor_pos[1] > grid_rect[1]
+                    && self.cursor_pos[0] < (grid_rect[0] + grid_rect[2])
+                    && self.cursor_pos[1] < (grid_rect[1] + grid_rect[3])
+                {
+                    // we're within the grid, so see what cell we're in (size + border width)
+                    self.cell_pos = Some([
+                        ((self.cursor_pos[0] - grid_rect[0]) / (cell_size + 1.0)).trunc() as isize,
+                        ((self.cursor_pos[1] - grid_rect[1]) / (cell_size + 1.0)).trunc() as isize,
+                    ]);
+                } else {
+                    self.cell_pos = None;
+                }
             }
-        }
 
-        if let Some(Button::Mouse(MouseButton::Left)) = e.press_args() {
-            if let Some(pos) = self.cell_pos {
-                if let Some(cell) = self.picgrid.get(pos[0], pos[1]) {
-                    let new_state;
-                    match cell {
-                        CellState::Unsolved(val) => new_state = CellState::Shaded(val),
-                        CellState::Shaded(val) => new_state = CellState::Unshaded(val),
-                        CellState::Unshaded(val) => new_state = CellState::Unsolved(val),
-                    };
-                    self.picgrid.set(pos[0], pos[1], new_state);
+            if let Some(Button::Mouse(MouseButton::Left)) = e.press_args() {
+                if let Some(pos) = self.cell_pos {
+                    if let Some(cell) = self.picgrid.get(pos[0], pos[1]) {
+                        let new_state;
+                        match cell {
+                            CellState::Unsolved(val) => new_state = CellState::Shaded(val),
+                            CellState::Shaded(val) => new_state = CellState::Unshaded(val),
+                            CellState::Unshaded(val) => new_state = CellState::Unsolved(val),
+                        };
+                        self.picgrid.set(pos[0], pos[1], new_state);
+                    }
                 }
             }
         }
@@ -84,7 +86,7 @@ impl PictureGridController {
         if let Some(_) = e.update_args() {
             if self.is_solving {
                 if let Some(cell) = self.cell_pos {
-                    let mut x = cell[0] + 1;
+                    let mut x = cell[0];
                     let mut y = cell[1];
 
                     self.messages.insert(1, format!("Processing ({},{})", x, y));
@@ -107,6 +109,7 @@ impl PictureGridController {
                         }
                     }
 
+                    x += 1;
                     if x >= self.picgrid.width as isize {
                         x = 0;
                         y += 1;

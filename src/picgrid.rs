@@ -54,7 +54,7 @@ impl PictureGrid {
 
     /// Get individual cell value
     pub fn get(&self, x: isize, y: isize) -> Option<CellState> {
-        let mut ret_val = None;
+        let mut ret_val = Some(CellState::Unshaded(PictureGrid::EMPTY));
         if x >= 0 && x < self.width as isize && y >= 0 && y < self.height as isize {
             ret_val = Some(self.cells[(y * self.width as isize + x) as usize].clone());
         }
@@ -196,12 +196,10 @@ impl PictureGrid {
 
     /// Finds if surrounding grid is complete (no unsolved)
     pub fn is_complete(&self, x: isize, y: isize) -> bool {
-        let mut num_available = 0;
         let mut num_complete = 0;
         for a in (x - 1)..(x + 2) {
             for b in (y - 1)..(y + 2) {
                 if let Some(cell) = self.get(a, b) {
-                    num_available += 1;
                     match cell {
                         CellState::Unshaded(_hint) => num_complete += 1,
                         CellState::Shaded(_hint) => num_complete += 1,
@@ -210,6 +208,6 @@ impl PictureGrid {
                 }
             }
         }
-        num_complete == num_available
+        num_complete == 9
     }
 }
