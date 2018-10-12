@@ -220,7 +220,7 @@ impl PictureGridView {
             }
         }
 
-        let labels = controller.messages.to_vec();
+        let labels = controller.get_messages();
         // labels.push("".to_string());
         // labels.push(format!("Cell Size: {:?}", &self.cell_size));
         // labels.push(format!("Cursor: {:?}", &controller.cursor_pos[..]));
