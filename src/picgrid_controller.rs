@@ -16,7 +16,7 @@ pub struct PictureGridController {
     /// Stores the last cursor position
     pub cursor_pos: [f64; 2],
     /// Stores if the solving algorithm is active
-    is_solving: bool,
+    pub is_solving: bool,
     /// Stores if solving algorithm needs another pass
     algorithm_needs_pass: bool,
     /// Determines how many steps to perform per update event
@@ -44,7 +44,9 @@ impl PictureGridController {
             format!("Steps per Update: {} ('+'/'-')", self.steps_per_update),
         ];
         if let Some(pos) = self.cell_pos {
-            ret_val.push(format!("Processing ({},{})", pos[0], pos[1]));
+            if self.is_solving {
+                ret_val.push(format!("Processing ({},{})", pos[0], pos[1]));
+            }
         }
         ret_val
     }
@@ -148,8 +150,6 @@ impl PictureGridController {
                             self.algorithm_needs_pass = false;
                         }
                     }
-                } else {
-                    self.cell_pos = None;
                 }
             }
         }

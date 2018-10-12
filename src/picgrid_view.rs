@@ -214,7 +214,10 @@ impl PictureGridView {
             }
 
             if let Some(pos) = &controller.cell_pos {
-                if (pos[0] - 1 == column_ptr as isize) && (pos[1] == row_ptr as isize) {
+                if controller.is_solving
+                    && (pos[0] - 1 == column_ptr as isize)
+                    && (pos[1] == row_ptr as isize)
+                {
                     current_cell.draw(cell_rect, &c.draw_state, c.transform, g);
                 }
             }
