@@ -4,5 +4,9 @@
         "**/.git/subtree-cache/**": true,
         "**/target/**": true
     },
-    "json.format.enable": false
+    "json.format.enable": false,
+    "search.exclude": {
+        "**/target": true
+    },
+    "lldb.verboseLogging": true
 }
