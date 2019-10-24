@@ -17,7 +17,7 @@ use std::io;
 use serde_json::error;
 
 use piston_window::types::Color;
-use piston_window::{clear, Filter, Glyphs, PistonWindow, TextureSettings, WindowSettings};
+use piston_window::{clear, PistonWindow, WindowSettings};
 use sdl2_window::Sdl2Window;
 
 pub use picgrid::{CellState, PictureGrid};
@@ -85,14 +85,12 @@ fn main() {
         .for_folder("assets")
         .unwrap();
     let ref font = assets.join("FiraSans-Regular.ttf");
-    let factory = window.factory.clone();
-    let texture_settings = TextureSettings::new().filter(Filter::Nearest);
-    let mut glyphs = Glyphs::new(font, factory, texture_settings).unwrap();
+    let mut glyphs = window.load_font(font).unwrap();
 
     while let Some(event) = window.next() {
         picgrid_controller.event(picgrid_view.grid_rect, picgrid_view.cell_size, &event);
 
-        window.draw_2d(&event, |context, graphics, device| {
+        window.draw_2d(&event, |context, graphics, _device| {
             clear(BGCOLOR, graphics);
             picgrid_view.draw(&picgrid_controller, &mut glyphs, &context, graphics);
         });
