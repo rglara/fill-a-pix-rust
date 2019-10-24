@@ -20,7 +20,6 @@
 	// Use 'settings' to set *default* container specific settings.json values on container create. 
 	// You can edit these settings after create using File > Preferences > Settings > Remote.
 	"settings": { 
-		//"lldb.adapterType": "bundled",
 		"lldb.executable": "/usr/bin/lldb",
 		"terminal.integrated.shell.linux": "/bin/bash"
 	},

@@ -23,6 +23,9 @@ RUN apt-get update \
     # Install other dependencies
     && apt-get install -y lldb \
     #
+    # Install SDL dependency (for UI rendering)
+    && apt-get install -y libsdl2-dev \
+    #
     # Install Rust components
     && rustup update \
     && rustup component add rls rust-analysis rust-src rustfmt clippy \
