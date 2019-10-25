@@ -88,9 +88,10 @@ fn main() {
     while let Some(event) = window.next() {
         picgrid_controller.event(picgrid_view.grid_rect, picgrid_view.cell_size, &event);
 
-        window.draw_2d(&event, |context, graphics, _device| {
+        window.draw_2d(&event, |context, graphics, device| {
             clear(BGCOLOR, graphics);
             picgrid_view.draw(&picgrid_controller, &mut glyphs, &context, graphics);
+            glyphs.factory.encoder.flush(device);
         });
     }
 }
