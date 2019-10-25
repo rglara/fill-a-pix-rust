@@ -12,7 +12,7 @@
 		// forward GUI from docker container to local X display (Linux only)
 		"--net=host",
 		"--env=DISPLAY",
-		"--volume=/home/greg/.Xauthority:/home/vscode/.Xauthority",
+		"--volume=${env:HOME}/.Xauthority:/home/vscode/.Xauthority",
 
 		"--env=RUST_BACKTRACE=1"
 	],

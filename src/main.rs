@@ -9,7 +9,6 @@ extern crate serde_json;
 
 extern crate find_folder;
 extern crate piston_window;
-extern crate sdl2_window;
 
 use std::fs::File;
 use std::io;
@@ -18,7 +17,6 @@ use serde_json::error;
 
 use piston_window::types::Color;
 use piston_window::{clear, PistonWindow, WindowSettings};
-use sdl2_window::Sdl2Window;
 
 pub use picgrid::{CellState, PictureGrid};
 pub use picgrid_controller::PictureGridController;
@@ -76,7 +74,7 @@ fn main() {
     let picgrid_view_settings = PictureGridViewSettings::new();
     let mut picgrid_view = PictureGridView::new(picgrid_view_settings);
 
-    let mut window: PistonWindow<Sdl2Window> = WindowSettings::new("Fill-a-Pix", DEFAULT_WINDOW)
+    let mut window: PistonWindow = WindowSettings::new("Fill-a-Pix", DEFAULT_WINDOW)
         .exit_on_esc(true)
         .build()
         .unwrap();
